@@ -29,7 +29,7 @@ main:		# Start of code section
 		la	$a0, prompt1
 		syscall
 		
-		li	$v0, 5
+		li	$v8, 5
 		syscall
 		
 		move	$t0,$v0
@@ -53,7 +53,7 @@ main:		# Start of code section
 		move	$t2, $v0
 		
 		li	$v0, 4
-		la	$a0, prompt4
+		la	$a0, prompt5
 		syscall
 		
 		li	$v0, 5
