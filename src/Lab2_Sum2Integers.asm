@@ -2,13 +2,10 @@
 #
 #  Instructions:
 #               1. Type in the program as written
-#               2. Compile, find and fix the bugs (hint there are 2 bugs in this program)
+#               2. Compile, find and fix the bugs (hint there is 1 bug in this program)
 #               3. Document each instruction (ie: put a comment line at each Instruction)
 #               4. Create a PDF with your code and screenshots showing the program working
 
-#               
-#
-#
 
                    	
 	.data
