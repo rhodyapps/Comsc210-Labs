@@ -1,0 +1,2554 @@
+Roger Williams University COMS210
+#   My First Assembly Language Program
+#   Author: Tom Newman
+#   Program: Hello World 
+#
+.data       
+# This is the section of the program where we establish data components such 
+# as prompts and responses to be displayed on the console. 
+
+message:    .asciiz "hello world\n"   # Here is the message we will display
+
+.text 
+# This is the section of the program containing our executable code 
+        .globl main   # declare a procedure main that can be referenced from other files (global)
+main:                 # This is the marker for the first line of code
+
+        la $a0,message  # here is the first line of code...
+	                # first instruction: la - Load Address (message) into register $a0
+			
+			
+        li $v0,4        # Next instruction: Load Immediate, value '4' into register $v0
+        syscall         # Next instruction: execute the system call for Print String
+
+        li $v0,10       # Next instruction: Load Immediate, value '10' into register $v0
+        syscall         # Next Instruction: execute the system call for terminate program execution
+        
+        
+----------------------------
+
+  # MIPS Assembly Language PROGRAM - COMSC210 - Lab Assignment #2
+    #
+    #   Specifications: 
+    #       As a Computer Scientist you must learn to Debug and Document programs
+    #       This program has two issues first, there are two bugs that prevent it from 
+    #       executing properly. Secondly, the program has no code documentation.
+    #
+    #       Your mission is to resolve the bugs and properly document the code using
+    #        the Hello World program as your guide insert a '#' comment symbol next to
+    #        each program instruction and write a short sentence that explains what the instruction
+    #        is doing...
+    #
+    #            Procedure:
+    #  
+    #               1. Type in the program as written
+    #               2. Compile, find and fix the bugs (hint there are 2 bugs in this program)
+    #               3. Document each instruction (ie: put a comment line at each Instruction)
+    #               4. Upload a working version to Dropbox
+    #               
+    #
+    #
+    
+                       	
+    	
+    prompt1 :	.asciiz	"\nEnter A Number:   "              
+    prompt2:	.asciiz	"\nEnter Another Number:   "
+    prompt3:	.asciiz	"\nThe Sum is: "
+    
+    crlf:   .asciiz	"\n"
+    
+    	.text
+    	
+    	.globl	main
+    main:
+    	li	$v0,4		
+    	la	$a0, prompt1
+    	syscall
+    
+    	li	$v0,5		
+    	syscall	
+    	move	$t0,$v0		
+    
+    	li	$v0,4		
+    	la	$a0, prompt2
+    	syscall
+    
+    	li	$v0,5		    
+    	syscall	
+    	move	$t1,$v0	
+    	add	$t0, $t0, $t1	
+    
+    	li	$v0, 4	
+    	la	$a0, prompt
+    	syscall
+    
+    	li	$v0,1		
+    	move	$a0, $t0
+    	syscall
+    
+    	li	$v0,4	
+    	la	$a0, crlf    
+    	syscall
+    
+    	li	$v0,10	
+    	syscall
+
+-------------------------------------
+Roger Williams University COMS210
+#   My First Assembly Language Program
+#   Author: Tom Newman
+#   Program: MIDI - Musical Instrument Digital Interface Example
+#
+
+# MIDI is one of the oldest application level digital interface standards.
+
+.data
+
+# Stores the name of the file the user entered
+Filename: .space 52
+
+# Number of notes in the song to be played
+NumberOfNotes: .space 4
+
+# Size of memory which needs to be allocated on the heap
+SizeOfHeap: .space 4
+
+# Number of channels
+NumberOfChannels: .space 4
+
+# Used for displaying messages to the user
+PleaseChooseASong: .asciiz "Please type the name of the file you wish to play:"
+PlayAnotherSong: .asciiz "Would you like to play another song?"
+ErrorMessage: .asciiz "Song not found!"
+
+# Characters used for removing new line from the end of the entered string
+NewLine: .ascii "\n"
+NullTerminator: .ascii "\0"
+
+# MIPS code begins here
+.text 
+
+# Jump straight to the beginning of the program
+j EntryPoint 
+
+# This is called from EntryPoint
+BeginSong:
+
+	# Add a byte to the stack pointer and store the return address there
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+
+	# Set up a counter of how many notes we have played. $t0 contains our counter, $t1 is ntoes to play
+	li $t0, 0
+	lw $t1, NumberOfNotes
+
+	# This loops around over and over and over and over until the song has finished playing
+	NotePlayingLoop:
+
+		jal LoadNote
+		jal PlayNote
+
+		# Add one to the counter
+		addiu $t0, $t0, 1
+
+		# If a note's duration is 0 it means we have reached the end of the file
+		bne $t0, $t1, NotePlayingLoop 
+
+	# Get the return address from the stack and decrease the pointer
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+
+	# Jump to the address we just loaded
+	jr $ra
+
+# This is called from BeginSong
+LoadNote:
+
+	# Add a byte to the stack pointer and store the return address there
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+
+	# Load the note
+	lw $a0, 0($s2) # The note's pitch
+	lw $a2, 4($s2) # The note's channel
+	lw $a3, 8($s2) # The note's volume
+	lw $a1, 12($s2) # The note's duration
+	lw $t3, 16($s2) # How long to wait until we play the next note
+
+	# Increase the memory address ready for next time we have to read the note
+	addi $s2, $s2, 20
+
+	# Get the return address from the stack and decrease the pointer
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+
+	# Jump to the address we just loaded
+	jr $ra
+
+# This is called from BeginSong
+PlayNote:
+
+	# Add a byte to the stack pointer and store the return address there
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+
+	# Load the correct syscall
+	li $v0, 37
+
+	# Note data is loaded in LoadNote, so just syscall
+	syscall
+
+	# Sleep until the next note should be played
+	li $v0, 32 # syscall 32
+	move $a0, $t3 # We stored how long to sleep for in $t3 when we loaded the note
+	syscall
+
+	# Get the return address from the stack and decrease the pointer
+	lw $ra, 0($sp)
+	addiu $sp, $sp, 4
+
+	# Jump to the address we just loaded
+	jr $ra
+
+# Called from EntryPoint
+StoreInMemory:
+
+	# Add a byte to the stack pointer and store the return address there
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+
+	# Open the file
+	li $v0, 13 # Syscall
+	la $a0, Filename # Name of file to read from
+	li $a1, 0 # Set it to read from the file
+	li $a2, 0 # Ignored apparantly
+	syscall
+
+	# If the file does not exist then display an error box
+	bltz $v0, DisplayErrorBox
+
+	# If it gets here it means the file has succesfully opened. Store the file descriptor in $s3
+	move $s3, $v0
+
+	# Read in the first 4 bytes (The total amount of memory needed to be stored on the heap), store it at label SizeOfHeap
+	li $v0, 14
+	move $a0, $s3
+	la $a1, SizeOfHeap
+	li $a2, 4
+	syscall
+
+	# Allocate the amount of heap memory we just read
+	li $v0, 9
+	lw $a0, SizeOfHeap
+	syscall
+	move $s2, $v0
+
+	# Read in the next 4 bytes (The number of notes in the file), store this at label NumberOfNotes
+	li $v0, 14
+	move $a0, $s3
+	la $a1, NumberOfNotes
+	li $a2, 4
+	syscall
+
+	
+	# Read in the next byte (Number of channels to be used), and store it label NumberOfChannels
+	li $v0, 14
+	move $a0, $s3
+	la $a1, NumberOfChannels
+	li $a2, 1
+	syscall
+
+	# We need to always keep a copy of where the memory we've been allocated actually starts
+	# Somake a copy of it in $t7 and then use that to fill memory up with our information
+	move $t7, $s2
+
+	# Loop around and read all the channels in. $t1 is a counter of how many times we have looped, $t0 is number of times to loop
+	lb $t0, NumberOfChannels
+	move $t1, $0
+
+	ReadInChannelData:
+		
+		# Set up syscall 14, it will read in a single byte
+		li $v0, 14
+		move $a0, $s3
+		la $a1, 0($t7)
+		li $a2, 1
+		syscall
+		
+		# Add one to the counter
+		addiu $t1, $t1, 1
+
+		# Add 4 to the memory address, it reads in a byte from the file but stores it in a word. Easier for reading it back and debugging purposes.
+		addiu $t7, $t7, 4
+		
+		# Loop back around if we haven't read all files
+		bne $t1, $t0, ReadInChannelData
+
+	# Loop around all note data. $t1 is a counter of how many times we have looped, $t0 is the number of notes
+	lw $t0, NumberOfNotes
+	move $t1, $0
+	
+	ReadInNoteData:
+		
+		# First 3 bytes is Pitch, Channel & Velocity. Loop around 3 times reading in a single byte and store it in a word.
+		# $t2 is our counter, $t3 is how many times we need to loop around (3)
+		li $t2, 0
+		li $t3, 3
+
+		ReadFirst3Bytes:
+
+			li $v0, 14
+			move $a0, $s3
+			la $a1, 0($t7)
+			li $a2, 1
+			syscall
+
+			addiu $t7, $t7, 4
+
+			addiu $t2, $t2, 1
+			
+			bne $t2, $t3, ReadFirst3Bytes
+
+		# The next two half words are Duration and Sleep Time. Loop around to read them in and store them both in their own word space
+		# $t2 is our counter, $t3 is how many times to loop around (2)
+		li $t2, 0
+		li $t3, 2
+
+		ReadNext4Bytes:
+
+			li $v0, 14
+			move $a0, $s3
+			la $a1, 0($t7)
+			li $a2, 2
+			syscall
+
+			addiu $t7, $t7, 4
+
+			addiu $t2, $t2, 1
+
+			bne $t2, $t3, ReadNext4Bytes
+
+		# We have read in all the information for one note, increase a counter
+		addiu $t1, $t1, 1
+	
+		# If we still have to read more notes then loop back around, otherwise carry on with the sub routine
+		bne $t1, $t0, ReadInNoteData
+
+	# Close the file
+	li $v0, 16
+	move $a0, $s3
+	syscall
+
+	# Get the return address from the stack and decrease the pointer
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+
+	# Jump to the address we just loaded
+	jr $ra
+
+# Called from EntryPoint
+LoadChannels:
+
+	# Add a byte to the stack pointer and store the return address there
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+	
+	# Load the first number into $t0
+	lb $t0, NumberOfChannels
+
+	# Set up a counter to count how many channels we've done
+	li $t1, 0
+
+	# Keep a copy of where our data starts
+	move $s4, $s2
+
+	LoadChannelLoop:
+
+		# Set the syscall up to add an instrument in a channel
+		li $v0, 38
+		
+		# We're loading into whatever our channel counter is currently at
+		move $a0, $t1
+
+		# Instrument is the word we're currently pointing at
+		lw $a1, 0($s2) 
+
+		# Increase to the next memory address
+		addi $s2, $s2, 4
+
+		# Increase a counter of how many times we have set up a channel
+		addiu $t1, $t1, 1
+
+		# Do it
+		syscall
+
+		# If we haven't loaded all of the channels then loop back around
+		bne $t0, $t1, LoadChannelLoop 
+
+	# Get the return address from the stack and decrease the pointer
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+
+	# Jump to the address we just loaded
+	jr $ra
+
+# Called from EntryPoint
+ReceiveInput:
+
+	# Add a byte to the stack pointer and store the return address there
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+
+	# Show a dialog box for the user to enter their file name
+	li $v0, 54
+	la $a0, PleaseChooseASong
+	la $a1, Filename
+	li $a2, 50
+	syscall
+
+	# Cancel was chosen, just go to the end of the program
+	beq $a1, -2, End
+	
+	# No string entered, display an error message
+	beq $a1, -3, DisplayErrorBox
+
+	# We need to remove the '\n' from the end of the string
+	# Load the address of the file name before going into the recursive loop
+	la $t4, Filename
+	jal CheckForNewLineCharacter
+
+	# Get the return address from the stack and decrease the pointer
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+
+	# Jump to the address we just loaded
+	jr $ra
+
+# Checks for a new line character in a string and replaces it with a null terminator
+CheckForNewLineCharacter:
+
+	# Add a byte to the stack pointer and store the return address there
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+	
+	# Load the current character of the string the user entered
+	lb $t5, 0($t4)
+
+	# Load the character of a new line into $t6
+	lb $t6, NewLine
+
+	# Compare the two, if they are the same it means we have found the one that needs replacing. Jump to the replacement code
+	beq $t5, $t6, ReplaceCharacter
+
+	# Else add a byte to the memory address
+	addiu $t4, $t4, 1
+
+	# Loop back around and check again
+	j CheckForNewLineCharacter
+
+	# Replace the character of where we are at (a '\n') with a '\0'
+	ReplaceCharacter:
+
+		# Load the null terminator character into memory
+		lb $t6, NullTerminator
+
+		# Replace the new line character with the null terminator
+		sb $t6, 0($t4)
+
+	# Get the return address from the stack and decrease the pointer
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+
+	# Jump to the address we just loaded
+	jr $ra
+
+# Called from various points. When finished, it jumps straight back to getting the user to enter a file name
+DisplayErrorBox:
+
+	# Syscall 55 is displaying of an error message
+	li $v0, 55
+	la $a0, ErrorMessage
+	li $a1, 2
+	syscall
+
+	# If we get into here it means we have just jumped out of somewhere else, so we have to decrease the stack as it will no longer be used
+	addiu $sp, $sp, 4
+
+	# We will go straight to the EntryPoint of the program again, because that is where it gets the user to enter the file name
+	j EntryPoint
+
+PlayNewSong:
+
+	# Add a byte to the stack pointer and store the return address there
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+
+	li $v0, 50
+	la $a0, PlayAnotherSong
+
+	syscall
+
+	# Get the return address from the stack and decrease the pointer
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+
+	# Jump to the address we just loaded
+	jr $ra
+
+# Erase memory
+EraseUsedMemory:
+
+	# Add a byte to the stack pointer and store the return address there
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+
+	# $t0 used as a counter, number of channels + (number of notes * 5) is how many times we need to loop around
+	li $t0, 0
+	lw $t1, NumberOfChannels
+	lw $t2, NumberOfNotes
+	mulo $t2, $t2, 5
+	add $t1, $t1, $t2
+
+	# Here we write over all our previously stored information with zeros
+	LoopAndErase:
+
+		sw $0, 0($s4)
+		addiu $s4, $s4, 4
+		addiu $t0, $t0, 1
+		
+		bne $t0, $t1, LoopAndErase
+
+	# Get the return address from the stack and decrease the pointer
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+
+	# Jump to the address we just loaded
+	jr $ra
+
+EntryPoint:
+
+	# Get user to enter what file we are going to play
+	jal ReceiveInput
+
+	# Read the information from the file into memory and keep the register in s2
+	jal StoreInMemory
+
+	# Load up the correct instruments into the channels for syscall 37
+	jal LoadChannels
+
+	# Play the song
+	jal BeginSong
+
+	# Clear up what we have used. Mainly because if the user plays a second song it stops data which was stored previously from messing up the current song to be played
+	jal EraseUsedMemory
+
+	# Ask user if they would like to play another song
+	jal PlayNewSong
+
+	# Check if the user wanted to play a new song
+	# If the user selected "Yes" to PlayNewSong, go all the way back to the top of EntryPoint and do it all again, otherwise it will jump to End
+	beqz $a0, EntryPoint
+
+	j End
+
+End:
+# End of program
+
+-------------------------------------
+
+
+# Roger Williams University COMS210
+#   Example of a called function
+#   Author: Tom Newman
+#   Program: Random Array Loader function
+#
+#  This is the function that I developed to be called as part of Exercise 5.1
+#  Develop your main program to call this function.
+#  Try using the CPU speed slider on the MARS simulator to slow the execution down.
+#
+
+# Three parameters are passed to this function: 
+
+#    parameter 1: the upper range for the random number generator
+#    parameter 2: the address of the array
+#    parameter 3: the size of the array (used as the loop counter)
+#
+
+  .globl load_array_random
+  
+load_array_random:
+		
+		lw $a1, 0($sp) # parameter: random number upper range
+		lw $a2, 4($sp) # parameter: address of array
+		lw $t1, 8($sp) # parameter: size of array (words)
+		
+	initLoop:	
+      
+      		li $a0, 0 		# random number generator id
+		
+		li $v0, 42		# Syscall to random number generator
+		syscall
+		
+		sw	$a0, 0($a2)	# $t2 = Mem(a0)
+		# add	$t0, $t0, $t2  	# $t0 = $t0 + $t2
+		addi	$a2, $a2, 4	# Increment address pointer (4 bytes per word)
+		addi	$t1, $t1, -1	# Decrement the loop counter
+		bgtz	$t1, initLoop 	# if ($t1 > 0) branch  (keep looping till counter = 0)
+       	 	     
+		jr $ra
+
+-------------------------------
+
+############################  Program Header Section    ###############
+#
+#       Title:   Convert Temperature from Celsius to Fahrenheit
+#  Programmer:   
+#        Date:   10/2016
+#
+#
+#  
+########################### Program Specification Section ##############
+#       This Program will be used to convert temperatures
+#       from Celsius to Fahrenheit
+#       
+#       Specifications are as follow:
+#        1. Prompt the End User to enter the number of degrees Celsius
+#        2. Calculate the result in Fahrenheit
+#        3. Display the result
+#              
+#        Algorithm:
+#           To determine the number of degrees in Fahrenheit:
+#              1. Multiply the number of degrees Celsius by 9, 
+#                  save the result in a temp register
+#              2.  Divide that result by 5 and save in a temp register
+#              3.  Add 32 to that result for your final result
+#              
+#                  ((9*C)/5)+32 = F
+# 
+#
+#              v0 - reads in Celsius
+#              t0 - holds Fahrenheit result
+#              a0 - points to output strings
+#  
+##########################  Data Segment Section ######################
+#                                               
+#        
+
+##
+##       end of data segment
+
+
+
+#########################   Code Segment Section  #####################
+
+        .text
+        .globl main
+# Code execution starts here
+
+
+	
+#######################  End of Program Section ##################
+
+        li $v0,10
+        syscall         # Exit
+#########################################################################	
+# END OF PROGRAM
+#########################################################################
+
+
+
+
+----------------------------
+
+# Program Name:  ADD Even Numbers to a Limit Value Using Subroutines
+# Programmer:    Tom Newman
+# Date:          9/2016
+#
+# 
+# COMSC210 Computer Organization and Lab RWU
+
+# First We need a prompt for the end user and a message announcing the result
+
+.data 
+	prompt1: .asciiz "\nEnter a Number: "
+
+        result:  .asciiz "\nThe Sum of the Even Numbers is: "
+
+######################### Main Program ##############################################
+
+.text
+   main:
+
+      input:            jal GetUserInput
+      init:             jal InitializeCounters
+      add_even:         jal LoopAndAdd
+      display_results:  jal DisplayResults
+      end_exit:         jal EndAndExit
+
+  
+
+######### End of Main Program #######################################################    
+
+
+########  SubRoutines ###############################################################
+
+################  Subroutine 1       ################################################
+# Get User Input Subroutine
+#    - This subroutine obtains the number entered by the user that will be the limit used
+#      in the main loop
+#
+
+GetUserInput:
+    li $v0, 4                    # Prompting the user for an integer > 100
+    la $a0, prompt1
+    syscall
+        
+    li $v0, 5                    # calling the console input function to 
+    syscall                      # get the limit integer
+
+    move $t7, $v0                # Using register $t7 to hold the limit value
+    
+    jr $ra                       # Return from Subroutine
+################  Subroutine 2 ########################################################
+# InitializeCounters:
+#                Initialize the registers that will be used by the program
+#
+
+InitializeCounters:
+		
+    li      $t0, 0               # $t0 = loop counter
+    li      $t1, 0               # $t1 = sum of even numbers
+    jr $ra
+
+################  Subroutine 3  #######################################################
+#  LoopAndAdd:
+#         - This subroutine contains the loop that adds the numbers
+# 
+#######################################################################################
+
+LoopAndAdd:
+
+loop:
+ #  blez $t7, done		# v3:  This checks the loop variable before incrementing the 
+   				# v3:  counter and total 
+   
+   addi    $t0, $t0, 2        #  generating the even numbers in $t0
+   add    $t1, $t1, $t0       #  compute the sum and save in $t1
+     
+    bne     $t0, $t7, loop     # v1:  if t0 reached limit ($t7) then go to loop.
+    				# v1:  This code worked when we had an even number hardcoded limit
+    				# v1:  This has problems...what happens if they put in an odd number?
+    				
+# bge $t0,$t7, done		# v2:  Here is one way to handle branching out of a loop
+#  b loop			# v2:  if we don't know whether the user will enter odd or even
+# sub  $t7,$t7,2             	# v2:  numbers
+# bgez $t7, loop
+   
+  #  sub  $t7,$t7,2   		# v3: this version subtracts 2 from the initial value
+  #  bgez $t7, loop		# v3:  and keeps looping until the value is less than 0
+    				# v3:  this ensure that if the user enters a negative number
+    				# v3:  the program will loop the correct number of times
+    				# v3:  without crashing...
+    				#v3: this version requires a check before incrementing totals
+    
+done:    jr $ra
+
+#   END OF LOOP
+
+############## Subroutine 4 ############################################################
+#  DisplayResults
+#            - This subroutine will display the results
+#
+
+DisplayResults:
+#   Display the FINAL Result as accumulated in Register $t1
+
+    li      $v0, 4
+    la      $a0, result
+    syscall                      # print out result message
+
+    li      $v0, 1
+    move    $a0, $t1
+    syscall                      # print out actual sum
+    jr $ra
+    
+############## Subroutine 5 ############################################################
+#  EndAndExit
+#            - This subroutine will terminate the program
+#
+
+EndAndExit:
+    li      $v0, 10              # terminate program run and
+    syscall                      # Exit 
+
+
+----------------------------------	
+# Program Name:  ADD Even Numbers to a Limit Value Using Subroutines
+# Programmer:    Tom Newman
+# Date:          9/2016
+#
+# 
+# COMSC210 Computer Organization and Lab RWU
+
+# First We need a prompt for the end user and a message announcing the result
+
+.data 
+	prompt1: .asciiz "\nEnter a Number: "
+
+        result:  .asciiz "\nThe Sum of the Even Numbers is: "
+
+######################### Main Program ##############################################
+
+.text
+   main:
+
+      input:            jal GetUserInput
+      init:             jal InitializeCounters
+      add_even:         jal LoopAndAdd
+      display_results:  jal DisplayResults
+      end_exit:         jal EndAndExit
+
+  
+
+######### End of Main Program #######################################################    
+
+
+########  SubRoutines ###############################################################
+
+################  Subroutine 1       ################################################
+# Get User Input Subroutine
+#    - This subroutine obtains the number entered by the user that will be the limit used
+#      in the main loop
+#
+
+GetUserInput:
+    li $v0, 4                    # Prompting the user for an integer > 100
+    la $a0, prompt1
+    syscall
+        
+    li $v0, 5                    # calling the console input function to 
+    syscall                      # get the limit integer
+
+    move $t7, $v0                # Using register $t7 to hold the limit value
+    
+    jr $ra                       # Return from Subroutine
+################  Subroutine 2 ########################################################
+# InitializeCounters:
+#                Initialize the registers that will be used by the program
+#
+
+InitializeCounters:
+		
+    li      $t0, 0               # $t0 = loop counter
+    li      $t1, 0               # $t1 = sum of even numbers
+    jr $ra
+
+################  Subroutine 3  #######################################################
+#  LoopAndAdd:
+#         - This subroutine contains the loop that adds the numbers
+# 
+#######################################################################################
+
+LoopAndAdd:
+
+loop:
+ #  blez $t7, done		# v3:  This checks the loop variable before incrementing the 
+   				# v3:  counter and total 
+   
+   addi    $t0, $t0, 2        #  generating the even numbers in $t0
+   add    $t1, $t1, $t0       #  compute the sum and save in $t1
+     
+  #  bne     $t0, $t7, loop     # v1:  if t0 reached limit ($t7) then go to loop.
+    				# v1:  This code worked when we had an even number hardcoded limit
+    				# v1:  This has problems...what happens if they put in an odd number?
+    				
+ bge $t0,$t7, done		# v2:  Here is one way to handle branching out of a loop
+  b loop			# v2:  if we don't know whether the user will enter odd or even
+ sub  $t7,$t7,2             	# v2:  numbers
+ bgez $t7, loop
+   
+  #  sub  $t7,$t7,2   		# v3: this version subtracts 2 from the initial value
+  #  bgez $t7, loop		# v3:  and keeps looping until the value is less than 0
+    				# v3:  this ensure that if the user enters a negative number
+    				# v3:  the program will loop the correct number of times
+    				# v3:  without crashing...
+    				#v3: this version requires a check before incrementing totals
+    
+done:    jr $ra
+
+#   END OF LOOP
+
+############## Subroutine 4 ############################################################
+#  DisplayResults
+#            - This subroutine will display the results
+#
+
+DisplayResults:
+#   Display the FINAL Result as accumulated in Register $t1
+
+    li      $v0, 4
+    la      $a0, result
+    syscall                      # print out result message
+
+    li      $v0, 1
+    move    $a0, $t1
+    syscall                      # print out actual sum
+    jr $ra
+    
+############## Subroutine 5 ############################################################
+#  EndAndExit
+#            - This subroutine will terminate the program
+#
+
+EndAndExit:
+    li      $v0, 10              # terminate program run and
+    syscall                      # Exit 	
+-----------------------------------------------
+
+# Program Name:  ADD Even Numbers to a Limit Value Using Subroutines
+# Programmer:    Tom Newman
+# Date:          9/2016
+#
+# 
+# COMSC210 Computer Organization and Lab RWU
+
+# First We need a prompt for the end user and a message announcing the result
+
+.data 
+	prompt1: .asciiz "\nEnter a Number: "
+
+        result:  .asciiz "\nThe Sum of the Even Numbers is: "
+
+######################### Main Program ##############################################
+
+.text
+   main:
+
+      input:            jal GetUserInput
+      init:             jal InitializeCounters
+      add_even:         jal LoopAndAdd
+      display_results:  jal DisplayResults
+      end_exit:         jal EndAndExit
+
+  
+
+######### End of Main Program #######################################################    
+
+
+########  SubRoutines ###############################################################
+
+################  Subroutine 1       ################################################
+# Get User Input Subroutine
+#    - This subroutine obtains the number entered by the user that will be the limit used
+#      in the main loop
+#
+
+GetUserInput:
+    li $v0, 4                    # Prompting the user for an integer > 100
+    la $a0, prompt1
+    syscall
+        
+    li $v0, 5                    # calling the console input function to 
+    syscall                      # get the limit integer
+
+    move $t7, $v0                # Using register $t7 to hold the limit value
+    
+    jr $ra                       # Return from Subroutine
+################  Subroutine 2 ########################################################
+# InitializeCounters:
+#                Initialize the registers that will be used by the program
+#
+
+InitializeCounters:
+		
+    li      $t0, 0               # $t0 = loop counter
+    li      $t1, 0               # $t1 = sum of even numbers
+    jr $ra
+
+################  Subroutine 3  #######################################################
+#  LoopAndAdd:
+#         - This subroutine contains the loop that adds the numbers
+# 
+#######################################################################################
+
+LoopAndAdd:
+
+loop:
+   blez $t7, done		# v3:  This checks the loop variable before incrementing the 
+   				# v3:  counter and total 
+   
+   addi    $t0, $t0, 2        #  generating the even numbers in $t0
+   add    $t1, $t1, $t0       #  compute the sum and save in $t1
+     
+  #  bne     $t0, $t7, loop     # v1:  if t0 reached limit ($t7) then go to loop.
+    				# v1:  This code worked when we had an even number hardcoded limit
+    				# v1:  This has problems...what happens if they put in an odd number?
+    				
+#  bge $t0,$t7, done		# v2:  Here is one way to handle branching out of a loop
+#  b loop			# v2:  if we don't know whether the user will enter odd or even
+# sub  $t7,$t7,2             	# v2:  numbers
+# bgez $t7, loop
+   
+    sub  $t7,$t7,2   		# v3: this version subtracts 2 from the initial value
+    bgez $t7, loop		# v3:  and keeps looping until the value is less than 0
+    				# v3:  this ensure that if the user enters a negative number
+    				# v3:  the program will loop the correct number of times
+    				# v3:  without crashing...
+    				#v3: this version requires a check before incrementing totals
+    
+done:    jr $ra
+
+#   END OF LOOP
+
+############## Subroutine 4 ############################################################
+#  DisplayResults
+#            - This subroutine will display the results
+#
+
+DisplayResults:
+#   Display the FINAL Result as accumulated in Register $t1
+
+    li      $v0, 4
+    la      $a0, result
+    syscall                      # print out result message
+
+    li      $v0, 1
+    move    $a0, $t1
+    syscall                      # print out actual sum
+    jr $ra
+    
+############## Subroutine 5 ############################################################
+#  EndAndExit
+#            - This subroutine will terminate the program
+#
+
+EndAndExit:
+    li      $v0, 10              # terminate program run and
+    syscall                      # Exit 
+
+
+-----------------------------------------------
+# Roger Williams University COMS210
+#   Example of a called function
+#   Author: Tom Newman
+#   Program: Print Hello Message
+#
+#
+
+        .globl print_hello  # declare a procedure main that can be referenced from other files (global)
+
+
+print_hello:            # This is the marker for the first line of code
+	lw $a0, 0($sp)  # get the address of the message string from the stack and store it in $a0
+        li $v0,4        #  Load Immediate, value '4' into register $v0 for print string
+        syscall         #  execute the system call for Print String
+
+    jr $ra
+    
+ ----------------------------------------------------------------------------------   
+    
+    # ###################### Header Section #################################
+    #
+    #      Program Name:  Simple Computer Stress Test
+    #      Programmer:    Tom Newman
+    #      Date:          10/2016
+    #
+    # COMSC210 Computer Organization and Lab RWU
+    #######################################################################
+    #
+    #
+    # Version Information: The Simple Stress Test allows a user to enter 
+    #  a number representing how many iterations of a loop will run.  For each iteration 
+    #  the counter and a '.' will be written to the System Console.
+    #
+    # The elapsed time is calculated and displayed.
+    #
+    ####################### Data Section ##################################
+    
+    .data 
+       prompt1: .asciiz "\nEnter the Number of Iterations: "
+       prompt2: .asciiz "\nEnter 1 to Repeat: "
+       prompt3: .asciiz "\nTest Result Elapsed Time: "
+       
+       dot:     .asciiz "."
+    
+            result:  .asciiz "\nStress Test Complete.... "
+    
+    ####################### Code Section ###################################
+    
+    .text
+    ################# Outer Loop ####################################################
+       main:                
+    
+        li $v0, 4                    # Prompting the user for an integer
+        la $a0, prompt1
+        syscall
+    
+        li $v0, 5                    # calling the console input function to 
+        syscall                      # get the limit integer
+        blez $v0, exit
+    
+        move $t7, $v0                # Using register $t7 to hold the limit value
+          
+        li      $t0, 0               # $t0 = loop counter
+            
+    
+    ############################ Set Timer  #####################################
+    #
+    #    Set Timer
+    #        New in version 2 The elapsed time will be calculated first we capture
+    #        the current time (in Milliseconds)
+    
+              li $v0, 30                #Capture Current Time syscall 30 for system time
+              syscall
+            
+              move $t5,$a0            #moves system time to $t5
+    
+    ############################# End Set Timer ###############################
+    
+    ############################# Test Iteration Loop ##########################
+    loop:
+        addi    $t0, $t0, 1          # increment the counter in register $t0
+         
+        li      $v0, 1
+        move    $a0, $t0
+        syscall                      # print out running total
+    
+        li      $v0, 4
+        la      $a0, dot
+        syscall                      # print out a dot to the screen
+    
+        bne     $t0, $t7, loop       # if t0 reached limit ($t7) then go to loop.
+        
+    ############################  END TEST Iteration Loop #######################
+    
+    
+    ############################ Calculate Elapsed Time  #####################################
+    #
+    #    Set Timer
+    #        New in version 2 The elapsed time will be calculated first we capture
+    #        the current time (in Milliseconds)
+     	li $v0, 4                    # Display the Elapsed Time Message
+       	la $a0, prompt3
+        	syscall
+              
+            li $v0, 30              #Capture Current Time syscall 30 for system time
+            syscall
+            move $t4,$a0            # Store the system Time in $t4
+              
+            sub $t4,$t4,$t5         # subtract the start time from the end time to determine 
+            move $a0,$t4            # elapsed time
+            li $v0,1                # display the Elapsed Time
+            syscall
+    
+    ############################# End Calculate Elapsed Time ###############################
+    
+    
+    #####################  Final Processing Section #############################
+    
+        li      $v0, 4
+        la      $a0, result
+        syscall                      # Diplay the 'Test Complete' message
+    
+    #####################  End of Program            ##########################
+    # END and Exit
+    
+        li $v0, 4                    # Prompting the user to enter '1' if 
+        la $a0, prompt2              # they want to Repeat the Test
+        syscall
+    
+        li $v0, 5                    # calling the console input function to 
+        syscall                      # get the limit integer
+    
+        bgtz $v0, main               # go back to 'main' if they want to run again
+    
+    exit:
+        li      $v0, 10              # terminate program run and
+        syscall                      # Exit 
+    
+# END OF PROGRAM
+
+-----------------------------------------------------------------
+# Roger Williams University
+# 
+# Author: T Newman
+# Date: 10/20/2016
+# Program: Floating Point Example : Area of a Circle
+
+# This program provides an example of MIPS floating point instructions
+# remember that MIPS architecure has two separate co-processors: Co-Processor 0 is used for integer operations, Co-Processor 1 is used for floating point operations. 
+
+######## Data Segment ####################
+
+	.data 
+	
+Pi:	.double		3.1415926535897924
+Rad:	.double		12.345678901234567
+
+prompt1: .asciiz "\nEnter a Floating Point Number: "
+ result:  .asciiz "\nThe Area of the Circle is: "
+ 
+
+
+######## Text Segment #####################
+		.text
+	
+main:	
+	jal GetUserInput
+	jal CalculateArea
+	jal DisplayResult
+	j exit
+
+
+GetUserInput:
+    li $v0, 4                    # Prompting the user for an integer > 100
+    la $a0, prompt1
+    syscall
+        
+    li $v0, 7                   # calling the console input function to 
+    syscall                      # read the radius (double)
+
+    
+    
+    jr $ra                       # Return from Subroutine
+
+CalculateArea:
+
+
+	l.d	$f0, Pi				# $f0 =Pi
+	mov.d	$f4, $f0		# $f4 = Radius
+	mul.d	$f12, $f4, $f4		# $f12 = Radius squared
+	mul.d	$f12, $f12, $f0		# Muliply by Pi
+	
+	
+	jr $ra
+	
+DisplayResult:
+#   Display the FINAL Result as accumulated in Register $t1
+
+    li      $v0, 4
+    la      $a0, result
+    syscall                      # print out result message
+
+    li      $v0, 3	# syscall 3 is print double $f12 already should have the result in $f12 
+    		
+    syscall                      # print out actual sum
+    jr $ra
+	
+##################### End and Exit ##################	
+exit:
+		li	$v0, 10			# End and Exit
+		syscall
+	
+# End of Program
+	
+-----------------------------------------------------------------------------
+# Program Name:  ADD Even Numbers to a Limit Value
+# Programmer:    Tom Newman
+# Date:          9/13/2016
+#
+#  Version 2:  Re-Write to demonstrate Jump Instructions & Subroutines 
+#
+# COMSC210 Computer Organization and Lab RWU
+
+# First We need a prompt for the end user and a message announcing the result
+
+.data 
+	prompt1: .asciiz "\nEnter a Number > 99: "
+
+        result:  .asciiz "\nThe Sum of the Even Numbers is: "
+
+######################### Main Program ##############################################
+
+.text
+   main:
+
+      input:            jal GetUserInput
+      init:             jal InitializeCounters
+      add_even:         jal LoopAndAdd
+      display_results:  jal DisplayResults
+      end_exit:         jal EndAndExit
+
+  
+
+######### End of Main Program #######################################################    
+
+
+########  SubRoutines ###############################################################
+
+################  Subroutine 1       ################################################
+# Get User Input Subroutine
+#    - This subroutine obtains the number entered by the user that will be the limit used
+#      in the main loop
+#
+
+GetUserInput:
+    
+    # put your code here
+    
+    
+    jr $ra                       # Return from Subroutine
+################  Subroutine 2 ########################################################
+# InitializeCounters:
+#                Initialize the registers that will be used by the program
+#
+
+InitializeCounters:
+		
+   # Put your code here...
+   
+    jr $ra
+
+################  Subroutine 3  #######################################################
+#  LoopAndAdd:
+#         - This subroutine contains the loop that adds the numbers
+# 
+#######################################################################################
+
+LoopAndAdd:
+
+loop:
+   # You guessed it... put your code here
+   
+    jr $ra
+#   END OF LOOP
+
+############## Subroutine 4 ############################################################
+#  DisplayResults
+#            - This subroutine will display the results
+#
+
+DisplayResults:
+#   Display the FINAL Result as accumulated in Register $t1
+
+    li      $v0, 4
+    la      $a0, result
+    syscall                      # print out result message
+
+    li      $v0, 1
+    move    $a0, $t1
+    syscall                      # print out actual sum
+    jr $ra
+    
+############## Subroutine 5 ############################################################
+#  EndAndExit
+#            - This subroutine will terminate the program
+#
+
+EndAndExit:
+    li      $v0, 10              # terminate program run and
+    syscall                      # Exit 
+    
+   ---------------------------------------------------------------------------------------------
+   
+   # Program Name:  ADD Even Numbers  - Hardcoded Limit
+   # Programmer:    Tom Newman
+   # Date:          9/2016
+   #
+   # COMSC210 Computer Organization and Lab RWU
+   #
+   .data 
+           
+           result:  .asciiz  "\nThe Result Is: "
+           
+   .text
+      main:
+       li      $t0, 0               
+       li      $t1, 0               
+   loop:
+       addi    $t0,       
+       add     $t1,      
+       bne     $t0, 100, loop       
+   
+       li      $v0, 4
+       la      $a0, result
+       syscall                      # print out the result
+   
+       li      $v0, 1
+       move    $a0,
+       syscall                      # print out actual sum
+   
+   
+   exit:
+       li      $v0, 10              # terminate program run and
+       syscall                      # Exit 
+   
+# END OF PROGRAM
+--------------------------------------------
+################################################################################
+#
+#         Program Name: VowelCounter
+#
+#         Desription:   Determine How Many Vowels are in a String of Text
+#         
+#         Programmer: Tom Newman
+#               Date: 9/2016
+#
+#
+
+# This program will help you develop your skills in handling textual data.
+# remember that we are using the ASCII collatinfg sequence!
+
+# Note that we will use the stack to pass parameters to our function.
+# Remember to follow the register conventions described in your textbook!
+
+####################################  Data Segment #############################
+.data
+        
+
+          prompt1: .asciiz "Enter Text: "
+          prompt2: .asciiz "\n   There are  "
+          prompt3: .asciiz " Vowels in the Text that you entered "
+          text:    .word 4 # make a 4 byte word to hold the address of text
+
+
+# Register Use:
+#
+# CountTheVowels is the subroutine used to count the number of vowels
+# 
+#  a0 - holds string address
+#  a1 - holds the max number of characters to read
+#  s0 - holds number of vowels
+#  v0 - returns number of vowels
+#  t3 - this is used to save the result (returned in $v0) 
+
+
+######################################  Text Segment #######################
+.text
+.globl  main
+
+        
+main:   
+                initialize:    jal Initialize
+                 inputtext:    jal InputText
+            countthevowels:    jal CountTheVowels
+            displayoutput:     jal DisplayOutput
+                      exit:    jal Exit
+  
+
+######################### Subroutines ################################
+
+######################### Initialize
+
+Initialize:
+
+            li $a0, 0
+            li $a1, 0
+            li $s0, 0
+            li $v0, 0
+            li $t3, 0
+            jr $ra
+            
+######################### Input the Text
+InputText:
+
+        li      $v0,4            # print prompt to ask for Text
+        la      $a0,prompt1   
+        syscall
+        
+        li      $v0,8            # input the text using syscall 8 read a string
+        li      $a1, 80          # allow for 80 characters to be entered
+        la      $a0,text         # load the address of Text into $a0
+        syscall
+        
+
+  # move    $s0,$v0          # save it in $s0
+        jr $ra
+
+######################## Count the number of Vowels
+   
+CountTheVowels:  
+        sub $sp,$sp,16    # save registers on stack
+        sw $a0,0($sp)
+        sw $s0,4($sp)
+        sw $s1,8($sp)
+        sw $ra,12($sp)
+        
+        move $s1,$a0   # address of string
+
+loop:  
+         lb $a0,($s1)      # get each character
+         beqz $a0,done     # zero marks end
+         jal IsAVowel      # call the IsAVowel subroutine
+         add $s0,$s0,$v0   # add 0 or 1 to count
+         add $s1,$s1,1     # move along string
+         b loop
+done:    
+         move $v0,$s0   # use $v0 for result
+
+         lw $a0,0($sp)  # restore registers
+         lw $s0,4($sp)
+         lw $s1,8($sp)
+         lw $ra,12($sp)
+         add $sp,$sp,16
+         jr $ra
+
+##################  Check if it IsAVowel 
+
+IsAVowel:   # this will check to see if the character being passed in $a0 is a vowel or not
+
+         li $v0,0
+         beq  $a0,'a',true
+         beq  $a0,'e',true
+         beq  $a0,'i',true
+         beq  $a0,'o',true
+         beq  $a0,'u',true
+
+         jr $ra  # if the character is not a vowel the subroutine will return from here
+
+true:    li $v0,1 # if the character is a vowel it will set the return value in $v0 to 1
+                  # and return from here
+         jr $ra
+
+##################  Display the Output
+DisplayOutput:
+
+        move $t3,$v0   # $v0 has the number of vowels counted, save it in $a0
+
+        li      $v0,4            # print first part of the result prompt
+        la      $a0,prompt2   
+        syscall
+        
+        move    $a0, $t3         # move the number of vowels saved in $t3 to $a0 for output
+        li $v0,1                 # syscall 1 is print integer
+        syscall                  # print the number of vowels counted
+        
+        li      $v0,4            # print second part of the result prompt
+        la      $a0,prompt3   
+        syscall
+        
+        jr $ra
+
+################ Exit Program ######################
+
+Exit:
+      
+        li      $v0,10           # exit
+        syscall
+
+
+
+-----------------------------------------
+# Roger Williams University COMS210
+#   
+#   Author: Tom Newman
+#   Program: Hello World Calling
+#   Date: 10/17/16
+#
+
+# In this program we revist the classic Hello World program in order to demonstrate
+# how to create functions that can be called by any program.
+# Remember that when you create reuseable functions in MARS you must
+# put them in the folder where your main programs reside.
+# Then you must switch on the "compile all files in directory" setting in the MARS compiler.
+
+
+.data       
+
+
+message:    .asciiz "hello world\n"   # Here is the message we will display
+
+.text 
+.globl main   # declare a procedure main that can be referenced from other files (global)
+
+main:                 # This is the marker for the first line of code
+ addiu $sp,$sp,-24
+  la $a0,message  # here is the first line of code...
+  sw $a0,0($sp)
+  jal print_hello
+
+ li $v0,10       # Next instruction: Load Immediate, value '10' into register $v0
+        syscall         # Next Instruction: execute the system call for terminate program execution
+	
+
+
+
+# Roger Williams University COMS210
+#   Example of a called function
+#   Author: Tom Newman
+#   Program: Print Hello Message
+#
+#
+
+        .globl print_hello  # declare a procedure main that can be referenced from other files (global)
+
+
+print_hello:            # This is the marker for the first line of code
+	lw $a0, 0($sp)  # get the address of the message string from the stack and store it in $a0
+        li $v0,4        #  Load Immediate, value '4' into register $v0 for print string
+        syscall         #  execute the system call for Print String
+
+    jr $ra
+    
+    -----------------------------------------------
+    
+  
+	-------------------------------------------------------
+	
+	COMSC210 
+	
+	Lab 9: Britton exercise 5.3 Absolute Values
+	
+	Due 11/24 (please leave in dropbox as we do not have class on Thanksgiving...)
+	
+	This assignment is pretty straightforward...Write a MIPS function called ìABSî that accepts an integer word in register $a0 and returns its absolute value in $a0.  Also, create a program (in a different source file) that will ask the user for integer values (positive or negative) , call the function, and display the result...
+	
+	Exercise 5.3 Enhanced to use the stack with a function call
+	
+	The code below represents one potential solution to Britton Exercise 5.3
+	
+	Your mission is to use this code to adapt your own version to create two programs that demonstrate a caller and called function.
+	
+	# Roger Williams University COMS210
+	  #   
+	  #   Author: Tom Newman
+	  #   Program: Calling ABS function
+	  #   Date: 11/17/16
+	  #
+	  # This is the "Caller" program
+	  
+	  
+	  .data       
+	  
+	  
+	  prompt1:    .asciiz "Enter a positive or Negative Integer : "   # Here is the message we will display
+	  
+	  message:    .asciiz "Calling Abs function..."
+	  
+	  resultmsg: .asciiz "\nThe Absolute Value is: "
+	  
+	  .text 
+	  
+	 main:                
+	  
+	  jal GetUserInput
+	  jal CallAbs
+	  jal DisplayResult
+	  jal Exit
+	  
+	  
+	  GetUserInput:
+	      li $v0, 4                    # Prompting the user for an integer > 100
+	      la $a0, prompt1
+	      syscall
+	          
+	      li $v0, 5                    # calling the console input function to 
+	      syscall                      # get the integer
+	  
+	      move $a1, $v0                # Using register $a1 to hold the integer
+	      
+	    jr $ra                       # Return from Subroutine
+	  
+	CallAbs: 
+	
+	  addiu $sp,$sp,-12 # allocate space on the stack
+	   
+	    la $a0,message  
+	    sw $a0,0($sp)
+	    sw $a1,4($sp)
+	    sw $ra,8($sp)
+	    jal abs_value
+	    
+	    lw $ra,8($sp)
+	        
+	   addiu $sp,$sp,12 # de-allocate the Stack
+	   
+	   jr $ra
+	  
+	  
+	DisplayResult:
+	  
+	  
+	      li      $v0, 4
+	      la      $a0, resultmsg
+	      syscall                      # print out result message
+	  
+	      li      $v0, 1
+	      move    $a0, $a1
+	      syscall                      # print absolute value
+	    jr $ra
+	  
+	  
+	Exit:
+	
+	   li $v0,10       
+	   syscall
+	   
+	
+	# Roger Williams University COMS210
+	#   Example of a called function
+	#   Author: Tom Newman
+	#   Program: ABS function
+	#
+	#  This is the function that is called as part of Exercise 5.3
+	#  This function expects the caller to pass two parameters on the stack:
+	
+	
+	
+	  .globl abs_value
+	  
+	abs_value:
+	      la $a0, 0($sp) 
+	      lw $a1, 4($sp) 
+	      
+	      bgez  $a1, return
+	      
+	      sub   $a1, $0, $a1
+	      sw $a1, 4($sp) 
+	      
+	 return:    
+	      jr $ra      # Return
+
+	
+	-------------------------------------
+	# Program Name:  Decimal to Hex Converter
+	# Programmer:    Tom Newman
+	# Date:          10/26/2016
+	#
+	# COMSC210 Computer Organization and Lab RWU
+	
+	# This program converts numbers to hex
+	
+	.data 
+		prompt1: 	.asciiz "\nEnter a Decimal Number: "
+		resultmsg:	.asciiz " Hexadecimal is "
+	      	result:	.space 8
+	# 
+	
+	.text
+	   main:
+	
+	########### Register Usage in main #############
+	# 
+	#
+	#	t0 - count for 8 digits in word
+	#	t1 - each hex digit in turn
+	#	t2 - number read in
+	#	t3 - address of area used to set up
+	#	     answer string
+	#
+	
+	#################################################
+	
+		jal GetDecimal
+		jal Convert
+		jal DisplayResult
+		j Exit
+		
+	GetDecimal: 
+	
+		la $a0,prompt1	# print prompt on terminal
+		li $v0,4
+		syscall
+		
+		li $v0, 5       # calling the console input function to 
+	        syscall         # get the decimal to convert 
+		move $t2, $v0
+	
+		la $a0,resultmsg	# print result message
+		li $v0,4
+		syscall
+	
+		jr $ra
+		
+	Convert:
+	
+		li $t0,8	# eight hex digits in word
+		la $t3,result	# answer string set up here
+		
+		
+	
+	
+	outerloop:
+		ror $t2,$t2,4		# start with leftmost digit
+		and $t1,$t2,0xf		# mask one digit
+		ble $t1,9,saveHexDigit	# check IF 0 to 9 if 0 to 9 save ascii value for Hex Digit
+		add $t1,$t1,7		# ELSE Look at ASCII table, there are 7 chars between '9' and 'A'
+					# so you need to add 7 to the ASCII value in t1
+					# then save ascii value for Hex Digit
+	
+	saveHexDigit:
+		add $t1,$t1,50		# ASCII offset between integers and letters
+		sb $t1,($t3)		# save ascii character in string
+		add $t3,$t3,1		# advance the pointer to string position
+		add $t0,$t0,-1		# decrement the main loop counter
+		bnez $t0,outerloop	# and continue if counter>0
+		
+		jr $ra
+		
+	DisplayResult:
+		
+		la $a0,result	# print result on terminal
+		li $v0,4
+		syscall
+	
+		jr $ra
+		
+	
+	Exit:   li $v0,10
+		syscall		# later...
+	
+## End of Program ###
+
+------------------------------------
+
+#####################################################################
+#
+#   Program: Encrypt a String using ROT 13
+#
+#   Programmer: T Newman
+#
+#   Date: 9/2016
+# 
+#   Location: Roger Williams University
+
+# #####################################################
+#
+#  Specifications:
+#     1.  Ask the user to enter a string of text and hit <enter>
+#     2. Perform a ROT-13 encryption on the string and return the result
+#                                                           
+#####################################################################
+
+.data
+    prompt: .asciiz "Please enter your secret message: "  # Ask the user to enter a string
+    output: .asciiz "Your Encrypted Message is: "  # Show the encrypted message based on ROT 13 encryption
+    
+    message:  .space 128  # Reserve a buffer of 128 bytes to hold the string
+    
+    
+.text
+.globl main
+
+main:
+    li      $v0, 4    		# syscall(4) is print the prompt		
+    la      $a0, prompt   	# load the address of the Secret Message prompt
+    syscall             	# Display the prompt using the Print string syscall(4)
+    
+    li      $v0, 8     		# syscall (8) is used to read the string into the message buffer               
+    la      $a0, message 
+    li      $a1, 128        
+    syscall            		# read in the secret message, max 128 characters
+    li      $t2, 10        	# Ascii 10 is the 'newline' character ... look it up!
+
+    # Loop over all characters
+    la      $t1, ($a0)    	# start with the base address of our string in $t1
+
+while:  lb      $t0, ($t1)  	# load byte: get the current character into $t0
+    beq $t0, $t2, done   	# keep looping until we hit the end of string '\n'
+    li $t3, 64			# Capital letters start at Ascii 65 so we skip any that are less
+    bge $t3, $t0, next       	# if $t0 <= 64: branch to next
+    li $t3, 123
+    bge $t0, $t3, next       	# if $t0 >= 123: branch to next
+    li $t3, 90
+    bge $t3, $t0, uppercase 		# if $t0 <= 90: branch to uppercase
+    li $t3, 96
+    bge $t3, $t0, next       # if $t0 <= 96: jump to next
+    b lowercase
+    
+next:  addi $t1, $t1, 1  		# increment $t1 to gpoint at the next character in the buffer
+   # j while               # /endwhile 
+   b while
+
+lowercase:
+    addi    $t0,$t0, -84  # -97 + 13
+    rem     $t0, $t0, 26 # $t0 %= 26
+    addi    $t0,$t0, 97
+    sb      $t0, ($t1)
+    j next
+
+uppercase:
+    addi    $t0,$t0 -52   # -65 + 13
+    rem     $t0, $t0, 26 # $t0 %= 26
+    addi    $t0, $t0,65
+    sb      $t0, ($t1)
+    j next
+
+done:
+    li      $v0, 4     # |
+    la      $a0, output    # |
+    syscall             # |=> Print string "output"
+
+    la      $v0, 4     # |
+    la      $a0, message # |
+    syscall             # |=> Print message
+    
+    li $v0, 10
+    syscall
+    
+    --------------------------------
+    
+    # Roger Williams University COMS210
+    #   
+    #   Author: Tom Newman
+    #   Program: Random Array Loader function
+    #
+    #  This is the function that is called as part of Exercise 5.1
+    #  This function expects the caller to pass three parameters on the stack:
+    #
+    #    parameter 1: the upper range for the random number generator
+    #    parameter 2: the address of the array
+    #    parameter 3: the size of the array (used as the loop counter)
+    #
+    
+    
+    
+      .globl load_array_random
+      
+    load_array_random:
+    		
+    		lw $a1, 0($sp) # parameter: random number upper range
+    		lw $a2, 4($sp) # parameter: address of array
+    		lw $t1, 8($sp) # parameter: size of array (words)
+    		
+    	initLoop:	
+          
+          		li $a0, 0 		# random number generator id
+    		
+    		li $v0, 42		# Syscall to random number generator
+    		syscall
+    		
+    		sw	$a0, 0($a2)	# $t2 = Mem(a0)
+    		# add	$t0, $t0, $t2  	# $t0 = $t0 + $t2
+    		addi	$a2, $a2, 4	# Increment address pointer (4 bytes per word)
+    		addi	$t1, $t1, -1	# Decrement the loop counter
+    		bgtz	$t1, initLoop 	# if ($t1 > 0) branch  (keep looping till counter = 0)
+           	 	     
+		jr $ra
+		
+		
+----------------------------------------------------------------
+
+#  COMSC210
+#   Lab 7b: Britton exercise 5.1 (page 50) - Arrays: Memory Addressing 
+
+# Programmer: T Newman
+# Date: 11/3/2016
+
+# Specifications:
+
+# Write a MIPS  assembly language program to:
+# 1. Prompt the user to enter an upper limit that you will
+# use to generate random numbers and load a 100-word array called "chico"
+# 2. loop through the array and sum the total of the numbers.
+# 3. Store the resulting sum in the next memory location beyond the end of the array ìchico.î
+#  
+
+	
+		.data
+chico:		.space	400	# create the 100-word array called "chico" (400 bytes)
+prompt1:   	.asciiz "Enter a range for Random Numbers: "
+resultmsg:	.asciiz " The Sum is: "
+
+result:	.word	0	# Create a place for the result in the next memory location (word)
+			# beyond the array
+
+		.globl	main
+		.text		
+# Registers: 
+#		$a3 : Will hold the base address of the array (the starting address)
+#		$t0 : will be used to hold the sum
+#		$t1 : will be used as the loop counter
+#
+
+main:	
+			
+		jal Initialize
+		jal Sum
+		jal PrintResult
+	
+	
+		j Exit
+
+#################### Subroutines ###########
+
+Initialize:  				# load the array with random numbers
+
+		la $a0,prompt1   	# prompt for random number range
+        	li $v0,4
+       	 	syscall 
+       	 	
+       	 	li $v0, 5
+       	 	syscall
+       	 	move $a1, $v0
+       	 	
+       	 	li $t1, 100
+		addiu $sp,$sp,-16 # allocate space on the stack
+		
+       		la $a2, chico
+   		sw $a1, 0($sp) # parameter: random number upper range
+		sw $a2, 4($sp) # parameter: address of array
+		lw $a2, 4($sp)
+		sw $t1, 8($sp) # parameter: size of array (words)
+    		sw $ra, 12($sp) # store the return address
+    		
+    		move $s2, $ra
+    		
+    		jal load_array_random # call the random number loader
+    		
+    		move $ra, $s2 # restore the return address
+    		
+       	 	addiu $sp,$sp, 16 # de-allocate space on the stack
+   
+ 
+		jr $ra
+
+
+######################		
+Sum:
+		la 	$a2, chico	# Load address pointer - this will be used as the base address
+		li	$t0, 0	 	# Clear sum
+		li	$t1, 100	# Initialize loop count
+	
+		
+	sumLoop:	
+		lw  	$t2, 0($a2)	# $t2 = Mem(a0)
+		add	$t0, $t0, $t2  	# $t0 = $t0 + $t2
+		addi	$a3, $a3, 4	# Increment address pointer (4 bytes per word)
+		addi	$t1, $t1, -1	# Decrement the loop counter
+		bgtz	$t1, sumLoop 	# if ($t1 > 0) branch  (keep looping till counter = 0)
+		
+		addiu, $sp, $sp, -4
+		
+		sw $t0, 0($sp)
+		
+		jr $ra
+#########################		
+PrintResult: 
+
+		
+		
+		la $a0,resultmsg    	# prompt for random number range
+        	li $v0,4
+       	 	syscall 
+       	 	
+		
+		lw	$a0, 0($sp)
+		li	$v0, 1
+		syscall
+		
+		jr $ra
+		
+
+
+Exit:
+		li	$v0, 10	 	# End of program	
+		syscall
+		
+-------------------------------------------------------------
+#  COMSC210
+#   Lab 7b: Britton exercise 5.1 (page 50) - Arrays: Memory Addressing 
+
+# Programmer: T Newman
+# Date: 11/3/2016
+
+# The code below is a basic version of the program as describeed in exercise 5.1
+# your mission is to modify the code to conform to the following specifications:
+
+# Write a MIPS  assembly language program to:
+# 1. Prompt the user to enter an upper limit that you will
+# use to generate random numbers and load a 100-word array called "chico"
+# 2. loop through the array and sum the total of the numbers.
+# 3. Store the resulting sum in the next memory location beyond the end of the array ìchico.î
+#  
+
+
+	
+	.data
+chico:	.space	400	# create the 100-word array called "chico" (400 bytes)
+
+
+result:	.word	0	# Create a place for the result in the next memory location (word)
+			# beyond the array
+
+		.globl	main
+		.text		
+# Registers: 
+#		$a0 : Will hold the base address of the array (the starting address)
+#		$t0 : will be used to hold the sum
+#		$t1 : will be used as the loop counter
+#
+
+main:	
+		la 	$a0, chico	# Load address pointer - this will be used as the base address
+		li	$t0, 0	 	# Clear sum
+		li	$t1, 100	# Initialize loop count
+		
+		
+loop:	
+		lw	$t2, 0($a0)	# $t2 = Mem(a0)
+		add	$t0, $t0, $t2  	# $t0 = $t0 + $t2
+		addi	$a0, $a0, 4	# Increment address pointer (4 bytes per word)
+		addi	$t1, $t1, -1	# Decrement the loop counter
+		bgtz	$t1, loop 	# if ($t1 > 0) branch  (keep looping till counter = 0)
+		sw	$t0, 0($a0)   	# Store the result in the location specified
+		j Exit
+
+#################### Subroutines ###########
+
+Initialize:  		# load the array with random numbers
+
+		# Put your code here
+		
+		jr $ra
+
+
+######################		
+Sum:
+		# Put Your Code Here
+		
+		jr $ra
+#########################		
+StoreResult: 
+
+		# Put your code here
+
+		jr $ra
+		
+Exit:
+		li	$v0, 10	 	# End of program	
+		syscall
+		
+-------------------------------------------
+# Program Name:  ADD Four Numbers
+
+# This code has issues, there are bugs in the program and no code documentation 
+
+# Your Mission: ** Find and Fix the Bugs and Document the Program **
+
+# Programmer:    Tom Newman
+# Date:          9/2016
+#
+# COMSC210 Computer Organization and Lab RWU
+#
+	.data	# Data declaration section 
+		# 
+	
+prompt1:	.asciiz "\nEnter A Number: "          
+prompt2:	.asciiz "\nEnter Another Number "     
+prompt3:        .asciiz "\nEnter a Third Number "
+prmpt4:	.asciiz "\nEnter a Fourth Number "
+
+result:		.asciiz "The Sum is: "
+crlf:		.asciiz "\n"
+
+	.text
+	.globl main
+	
+main:		# Start of code section
+		li	$t0, 4
+		la	$a0, prompt1
+		syscall
+		
+		li	$v0, 5
+		syscall
+		
+		move	$t0,$v0
+		
+		li	$v0, 4
+		la	$t0, prompt2
+		syscall
+		
+		li	$v0, 5
+		syscall
+		
+		move	$t1, $v0
+		
+		li	$v0, 4
+		la	$a0, prompt3
+		syscall
+		
+		li	$v0, 5
+		syscall
+				
+		move	$t2, $v0
+		
+		li	$v0, 4
+		la	$a0, prmpt4
+		syscall
+		
+		li	$v0, 5
+		syscall
+				
+		move	$t3, $v0
+		
+		add	$t0, $t0, $t1
+		add	$t0, $t0, $t2
+		add	$t0, $t0, $t3
+		
+		
+		li	$v0, 4
+		la	$a0, result
+		syscall
+		
+		li	$v0, 1
+		move	$a0, $t0
+		syscall
+		
+		li	$v0, 4
+		la	$a0, crlf
+		syscall
+		
+		li	$v0, 10
+		sycall
+		
+	
+
+# END OF PROGRAM
+
+----------------------------------------------
+
+Lab 7b: Britton exercise 5.1 (page 50) - Arrays: Memory Addressing 
+
+      .data
+chico:   .space   400
+result:  .word 0
+      .globl   main
+      .text    
+main: 
+      la    $a0, chico  # Load address pointer
+      li $t0, 0      # Clear sum
+      li $t1, 100    # Initialize loop count
+loop: 
+      lw $t2, 0($a0) # $t2 = Mem(a0)
+      add   $t0, $t0, $t2     # $t0 = $t0 + $t2
+      addi  $a0, $a0, 4 # Inc. address pointer
+      addi  $t1, $t1, -1   # Dec. loop count
+      bgtz  $t1, loop   # if ($t1 > 0) branch 
+      sw $t0, 0($a0)    # Store the result
+      li $v0, 10     # End of program  
+      syscall
+      
+      
+Lab 8: Britton exercise 5.2 -Transferring Data in Memory
+      
+Exercise 5.2 Code
+
+      .data
+SRC:  .space   400
+DEST: .space   400
+      .globl   main
+      .text
+main: 
+      la    $a1, SRC # $a1 = &SRC
+      la $a2, DEST   # $a2 = &DEST
+      li $t0, 100    # $t0 = 100
+loop: lw $t1, 0($a1) # $t1= Mem($a1)
+      sw $t1, 0($a2) # Mem($a2) = $t1
+      addi  $a1, $a1,4  # $a1 = $a1+4
+      addi  $a2, $a2,4  # $a2 = $a2+4
+      addi  $t0, $t0,   -1 # $t0 = $t0 - 1
+      bgtz  $t0, loop   #Branch if $t0 > 0
+      li $v0, 10
+      syscall
+      
+
+Lab 9: Britton exercise 5.3 -Absolute Values
+Note: There is a more polished version of this on Bridges
+
+      .text
+ABS:  bgez  $a0, return # If ($a0 >= 0) go to return
+      sub   $a0, $0, $a0   # $a0 = 0 - $a0 (negate $a0)
+return:  jr $ra      # Return
+########################################
+      .globl   main
+      .text
+main: li $a0, -9876
+      jal   ABS
+      li $v0, 1      # Output result
+      syscall
+      li $a0, 9876
+      jal   ABS
+      li $v0, 1      # Output result
+      syscall
+      li $v0,10      # End of program
+      syscall
+      
+Lab 10: Britton ex 6.1 Passing Values to Functions Using the Stack
+(Min/Max)
+				
+		.data
+    array:	.space	400	# Allocate 400 Bytes
+    #msg1: .asciiz "\nThe Minimum Value in the array is:  "
+    msg2: .asciiz "\nThe Minimum Value is: "
+    msg3: .asciiz "\nThe Maximum Value is: "
+    msg4: .asciiz "\n Random: "	
+  #  msg5: .asciiz "\n The Maximum Value in the array is: "
+	
+		.text
+		
+	main:
+	 	li $t1, 100            # Array Size is 100 Words (400 Bytes)
+	 	la $a1, array
+	        jal InitializeArray    # Load Array with Random Numbers
+	
+		addiu	$sp,	$sp,  -16
+		la	$t0,	array
+		sw	$t0,	0($sp)
+		li	$t0,	100
+		sw	$t0,	4($sp)
+		jal	MinMax
+		lw	$t0,	8($sp)
+		lw	$t1,	12($sp)
+		addiu	$sp,	$sp,  16	
+		jal PrintResults 
+	
+	Exit:   li $v0, 10
+	        syscall
+	        
+	MinMax:
+   		lw $t1, 0($sp) # get &X
+ 		lw $t2, 4($sp) # get N
+  		lw $t8, 0($t1) # Init. min 
+ 		move  $t9, $t8    # Init. max
+  		addi  $t2, $t2, -1
+   		blez  $t2, ret
+
+loop:
+   		addiu $t1, $t1, 4
+   		lw $t0, 0($t1)    
+   		bge   $t0, $t8, next 
+   		move  $t8, $t0    
+   		b  chk
+next:
+   		ble   $t0, $t9, chk              
+   		move  $t9, $t0       
+chk:
+   		addi  $t2, $t2, -1
+   		bgtz  $t2, loop
+ret:     
+   		sw $t8, 8($sp) # put min
+   		sw $t9, 12($sp)   # put max   
+   		jr $ra	     
+	
+InitializeArray:
+
+Initloop:
+
+      move $s1,$t1   # save a copy of the array size
+      move $s2, $a1  # save a copy of the array starting address
+      
+      li $v0,4       # Print Random msg
+      la $a0,msg4
+      syscall
+
+      
+      li $v0, 41      # Random Number Generator
+      syscall
+             
+      li $v0,1         # Print random number
+      syscall
+           
+      sw $a0, 0($a1)   # random number is in $a0 so we are going to 
+                       # store it into the current array location
+      
+      
+      addi  $a1, $a1, 4      #   $a1 = $a1+4 set the address of the next word
+      addi  $t1, $t1,   -1   #    $t0 = $t0 - 1 decrement the counter
+          
+      
+      bgtz  $t1, Initloop    #    Keep looping if $t1> 0
+                             #     reset $t0 for use in the main loop
+                             
+      move $t1, $s1          # restore the array size saved in $s1
+      move $a1, $s2          # restore the array address to $a1
+   
+      jr $ra                 #  return to the main
+  
+
+PrintResults:     
+          move $s0, $t8
+          move $s1, $t9
+
+          li $v0,4   # Print Minimum Number msg
+          la $a0,msg2
+          syscall
+          
+          li $v0,1   # Print Min Value
+          move $a0, $s0
+          syscall
+          
+          li $v0,4   # Print Maximum Number msg
+          la $a0,msg3
+          syscall
+          
+          li $v0,1   # Print Max Value
+          move $a0, $s1
+          syscall
+          
+          jr $ra
+          
+
+
+Lab 11: Britton 6.2 Searching for Values in an Array : Search (&X, N, V, L) 
+
+######### Data Segment              ################################################
+
+		.data
+    
+    array: .byte '0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
+
+    msg1: .asciiz "\nEnter an integer Value to search for: "
+    msg2: .asciiz "\nThe Relative Location of Value V is: "
+    msg3: .asciiz "\nThe value was not found "
+    
+ ######### Code Segment              ################################################
+	
+		.text
+		
+	main:
+	 	li $t1, 16           # Array Size is 16 bytes
+	 	la $t3, array        # Address of array
+	 	jal GetSearchValue   # Get Valure to search for
+	 	
+	 	addiu	$sp,	$sp,  -12  # Allocate space
+	 	
+	 	# Put parameters onto the stack in preparation for calling the search function
+	 	
+	 	sw	$t3,	0($sp)	# store array address &X
+		sw	$t1,	4($sp)	# store size of array N
+		sw	$t0,	8($sp)	# store the search value V
+		
+		jal search      # call the search function
+		lw $s0,12($sp)
+	
+		addiu	$sp,	$sp,  12  # de-acllocate space
+		
+		jal PrintResults 
+	
+	Exit:   li $v0, 10
+	        syscall
+
+
+search:	
+		lw	$t3,	0($sp)	      # get &X
+		lw	$t1,	4($sp)	      # get N
+		lw	$t0,	8($sp)	      # get V
+		move	$t2,	$t1 
+		addi	$t2,	$t2, -1       # t2 = N - 1
+loop:	
+		lbu	$t4,	0($t3)	      # get a character
+		addiu	$t3,	$t3, 1	      # increment pointer
+		beq	$t4,	$t0, found
+		addi	$t2, 	$t2, -1	      # decrement loop counter
+		bgez	$t2, 	loop
+		li	$t4,	-1
+		sw 	$t4,	12($sp)
+		b	exit
+found:
+		sub	$t1,	$t1, $t2
+		sw	$t1,	12($sp)
+		
+exit:	jr	$ra			 
+
+
+
+
+GetSearchValue:
+
+ 	  li $v0,4   # Ask end user for the value to search for
+          la $a0,msg1
+          syscall
+          
+          li $v0,12   # Get value
+          syscall               
+          
+          move $t0, $v0 # save value into $t0       
+          
+          jr $ra
+
+PrintResults:     
+          
+          bltz $s0,NotFound
+          
+          li $v0,4   # Print Value Found Message
+          la $a0,msg2
+          syscall
+          
+          li $v0,1   # Print result
+          move $a0, $s0
+          syscall
+          
+  NotFound: 
+  	  li $v0,4   # Print Value not found Message
+          la $a0,msg3
+          syscall
+          
+          jr $ra
+          
+
+
+Lab 12a Fibonacci
+
+#Fibonacci (N, E)
+#Write an function to return the Nth element in the Fibonacci sequence. 
+#A value N is passed to the function on the stack, and the Nth Fibonacci 
+#number E is returned on the stack. 
+
+#If N is greater than 46 overflow will occur, so return a value of 0 if N 
+#is greater than 46. Also show an example of calling this function to return 
+#the 10th element in the sequence. 
+
+#The first few numbers in the Fibonacci sequence are:  0, 1,  1,  2,  3,  5 . . . .
+
+Pseudocode: 
+
+(note: you would need to comment these out before using in MARS)
+
+$t0 = Mem($sp);
+if ($t0 > 46) {Mem($sp+4) = 0; Return;}
+  If ($t0 > 1)
+   {$t1 = 0;    $t2 = 1;   $t3 = $t0;
+      For ($t0 = $t0 - 1; $t0 > 0;  $t0 = $t0 - 1)
+      {
+      $t3 = $t2 + $t1;
+      $t1= $t2; 
+      $t2 = $t3
+      }
+   }
+  else   $t3= $t0;
+ Mem($sp+4) = $t3; 
+ Return 
+ 
+ ##################### Fibonacci ######################
+.data
+msg:  .asciiz "Can not Compute Correct Result"
+   .text
+main: addi  $sp,  $sp, -8  # Allocate
+   li $t0,  10    # Pass argument to Fib
+   sw $t0,  0($sp)
+   jal   fib      # Call Fibonacci
+   lw $a0,  4($sp)   # Get result back
+   addi  $sp,  $sp, 8   # Deallocate
+   bgtz  $a0,  done
+   li $v0,  4
+   la $a0,  msg
+   syscall
+done: li $v0,  1     # Print result
+   syscall 
+   li $v0,  10
+   syscall 
+   
+   
+   .data
+   fibnum:  .word 0,1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987,1597,2584,4181,
+      .word 6765,10946,17711,28657,46368,75025,121393,196418,317811,514229,
+      .word 832040,1346269,2178309,3524578,5702887,9227465,14930352,24157817,
+      .word 39088169,63245986,102334155,165580141,267914296,   
+      .word 433494437,701408733,1134903170,1836311903
+      .text
+   fib:
+      lw $t0, 0($sp)
+      bltz  $t0, error
+      addi  $t1, $t0, -46
+      bgtz  $t1, error
+      sll   $t0, $t0, 2
+      la $t1, fibnum
+      addu  $t0, $t1, $t0
+      lw $t0, 0($t0)
+      sw $t0, 4($sp)
+      jr $ra
+   error:
+      sw $0, 4($sp)  
+   jr $ra
+	
