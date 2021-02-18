@@ -1,4 +1,4 @@
-# Program Name:  ADD Four Integers
+# Program Name:  Sum Eight Integers
 # Programmer:    Tom Newman
 # Date:     
 #
@@ -25,6 +25,12 @@ crlf:		.asciiz "\n"
 	.globl main
 	
 main:		# Start of code section
+
+		li 	$t7, 8
+		li 	$t0, 0
+
+enterNum:
+		blez    $t7, end
 		li	$v0, 4
 		la	$a0, prompt1
 		syscall
@@ -32,39 +38,41 @@ main:		# Start of code section
 		li	$v0, 5
 		syscall
 		
-		move	$t0,$v0
+		add	$t0,$t0,$v0
+		addi	$t7, $t7, -1
+		b 	enterNum
 		
-		li	$v0, 4
-		la	$a0, prompt2
-		syscall
+		#li	$v0, 4
+		#la	$a0, prompt2
+		#syscall
 		
-		li	$v0, 5
-		syscall
+		#li	$v0, 5
+		#syscall
 		
-		move	$t1, $v0
+		#move	$t1, $v0
 		
-		li	$v0, 4
-		la	$a0, prompt3
-		syscall
+		#li	$v0, 4
+		#la	$a0, prompt3
+		#syscall
 		
-		li	$v0, 5
-		syscall
+		#li	$v0, 5
+		#syscall
 				
-		move	$t2, $v0
+		#move	$t2, $v0
 		
-		li	$v0, 4
-		la	$a0, prompt4
-		syscall
+		#li	$v0, 4
+		#la	$a0, prompt4
+		#syscall
 		
-		li	$v0, 5
-		syscall
+		#li	$v0, 5
+		#syscall
 				
-		move	$t3, $v0
+		#move	$t3, $v0
 		
-		add	$t0, $t0, $t1
-		add	$t0, $t0, $t2
-		add	$t0, $t0, $t3
-		
+		#add	$t0, $t0, $t1
+		#add	$t0, $t0, $t2
+		#add	$t0, $t0, $t3
+end:		
 		
 		li	$v0, 4
 		la	$a0, result
