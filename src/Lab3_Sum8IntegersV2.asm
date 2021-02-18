@@ -4,11 +4,8 @@
 #
 # COMSC210 Computer Organization and Lab RWU
 #
-#  Instructions:
-#               1. Type in the program as written
-#               2. Compile, find and fix the bugs (hint there are 2 bugs in this program)
-#               3. Document each instruction (ie: put a comment line at each Instruction)
-#               4. Create a PDF with your code and screenshots showing the program working
+#  Description::
+#              
 #
 #               This program shows how to use branch instructions and a countdown variable
 #               to create a loop and exit condition when the countdown variable reaches a limit
@@ -17,9 +14,7 @@
 		# 
 	
 prompt1:	.asciiz "\nEnter Number "          
-prompt2:	.asciiz "\nEnter Another Number "     
-prompt3:        .asciiz "\nEnter a Third Number "
-prompt4:	.asciiz "\nEnter a Fourth Number "
+
 filler:		.asciiz " :  "
 
 result:		.asciiz "The Sum is: "
@@ -56,36 +51,7 @@ enterNum:
 		addi	$t7, $t7, -1		# Decrement the loop counter by 1
 		b 	enterNum		# go back to enterNum to get the next integer
 		
-		#li	$v0, 4
-		#la	$a0, prompt2
-		#syscall
 		
-		#li	$v0, 5
-		#syscall
-		
-		#move	$t1, $v0
-		
-		#li	$v0, 4
-		#la	$a0, prompt3
-		#syscall
-		
-		#li	$v0, 5
-		#syscall
-				
-		#move	$t2, $v0
-		
-		#li	$v0, 4
-		#la	$a0, prompt4
-		#syscall
-		
-		#li	$v0, 5
-		#syscall
-				
-		#move	$t3, $v0
-		
-		#add	$t0, $t0, $t1
-		#add	$t0, $t0, $t2
-		#add	$t0, $t0, $t3
 end:		
 		
 		li	$v0, 4
