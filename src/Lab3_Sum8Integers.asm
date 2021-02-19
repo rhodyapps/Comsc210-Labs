@@ -4,11 +4,10 @@
 #
 # COMSC210 Computer Organization and Lab RWU
 #
-#  Instructions:
-#               1. Type in the program as written
-#               2. Compile, find and fix the bugs (hint there are 2 bugs in this program)
-#               3. Document each instruction (ie: put a comment line at each Instruction)
-#               4. Create a PDF with your code and screenshots showing the program working
+#  This version has the code from the first Lab3 example sum 4 integers
+#   if you put this in the MIPS simulator you will see that the code
+# after the unconditional branch is highlighted in green because it
+# will not be executed (or compiled) since it is being skipped by the branch instructions
 
 	.data	# Data declaration section 
 		# 
