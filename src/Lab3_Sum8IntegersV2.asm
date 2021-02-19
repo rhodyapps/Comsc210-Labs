@@ -1,6 +1,6 @@
 # Program Name:  Sum Eight Integers
 # Programmer:    Tom Newman
-# Date:     
+# Date:     2/18/2021
 #
 # COMSC210 Computer Organization and Lab RWU
 #
@@ -13,9 +13,9 @@
 	.data	# Data declaration section 
 		# 
 	
-prompt1:	.asciiz "\nEnter Number "          
+prompt1:	.asciiz "\nEnter Number "          # This is the only prompt we need for entering numbers
 
-filler:		.asciiz " :  "
+filler:		.asciiz " :  "			# This will be used to help show which number we are asking for
 
 result:		.asciiz "The Sum is: "
 crlf:		.asciiz "\n"
@@ -25,10 +25,14 @@ crlf:		.asciiz "\n"
 	
 main:		# Start of code section
 
+# initialize loop variables
 		li 	$t7, 8   # Set the counter to 0
 		li 	$t0, 0   # Set the accumulator to 0
 		li	$t6, 0   # Set the display count variable to 0
-
+		
+		
+# This is the top of the loop 
+ 
 enterNum:
 		blez    $t7, end		# End the loop if we have reached the number of iterations
 		addi	$t6, $t6, 1		# Add 1 to the display counter $t6
@@ -52,13 +56,13 @@ enterNum:
 		b 	enterNum		# go back to enterNum to get the next integer
 		
 		
-end:		
+end:		# This is the branch point where our loop will land after it finishes
 		
-		li	$v0, 4
-		la	$a0, result
+		li	$v0, 4			# Load immediate syscall 4 print string
+		la	$a0, result		# print the 'sum is' message
 		syscall
 		
-		li	$v0, 1
+		li	$v0, 1			# print the sum
 		move	$a0, $t0
 		syscall
 		
