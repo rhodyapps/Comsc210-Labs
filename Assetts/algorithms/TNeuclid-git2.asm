@@ -72,8 +72,8 @@ HALT:				# finish with syscall(10)
 
 ################# Euclids Algorithm - MIPS Function - Recursive ####################################
 euc:
-	sub	$sp,$sp,8	# push stack
-	sw	$ra,4($sp)	# save return address
+	sub	$sp,$sp,8		# push stack
+	sw	$ra,4($sp)		# save return address
 
 	bne $a1, $zero, L1 # if b!=0 then exit
 	add	$v0,$zero,$a0	# return a0
