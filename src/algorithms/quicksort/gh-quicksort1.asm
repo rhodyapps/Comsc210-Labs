@@ -7,6 +7,7 @@
 array: .word 12,15,10,5,7,3,2,1 # Define a variable named array as a word (integer) array.
 # After your program has run, the integers in this array
 # should be sorted.
+
 .text # Defines the start of the code section for the program .
 .globl main
 
@@ -15,6 +16,7 @@ la $t0, array # Moves the address of array into register $t0.
 addi $a0, $t0, 0 # Set argument 1 to the array.
 addi $a1, $zero, 0 # Set argument 2 to (low = 0)
 addi $a2, $zero, 7 # Set argument 3 to (high = 7, last index in array)
+
 jal quicksort # Call quick sort
 li $v0, 10 # Terminate program run and
 syscall # Exit
