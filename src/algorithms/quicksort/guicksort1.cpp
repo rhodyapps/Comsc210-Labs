@@ -13,7 +13,12 @@ void swap(int* a, int* b)
 the pivot element at its correct position in sorted
 	array, and places all smaller (smaller than pivot)
 to left of pivot and all greater elements to right
-of pivot */
+of pivot 
+
+Watch this vide to see one iteration of the partition function
+https://www.youtube.com/watch?v=MZaf_9IZCrc
+
+*/
 int partition (int arr[], int low, int high)
 {
 	int pivot = arr[high]; // pivot
