@@ -16,6 +16,7 @@ addi $a0, $t0, 0 # Set argument 1 to the array.
 addi $a1, $zero, 0 # Set argument 2 to (low = 0)
 addi $a2, $zero, 7 # Set argument 3 to (high = 7, last index in array)
 jal quicksort # Call quick sort
+
 li $v0, 10 # Terminate program run and
 syscall # Exit
 
