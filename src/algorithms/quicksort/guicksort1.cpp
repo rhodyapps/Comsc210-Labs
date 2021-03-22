@@ -70,7 +70,7 @@ void printArray(int arr[], int size)
 int main()
 {
 	int arr[] = {7, 2, 1, 8, 6, 3, 5, 4};
-	int n = sizeof(arr)/sizeof(arr[0]);
+	int n = sizeof(arr)/sizeof(arr[0]); // What is the meaning of this?
 	quickSort(arr, 0, n-1);
 	printf("Sorted array: \n");
 	printArray(arr, n);
