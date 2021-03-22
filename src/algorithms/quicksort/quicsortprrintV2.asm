@@ -92,11 +92,17 @@ quicksort:				#quicksort method
 	sw $ra, 12($sp)			# return address
 
 	move $t0, $a2			#saving high in t0
-
-	slt $t1, $a1, $t0		# t1=1 if low < high, else 0
-	beq $t1, $zero, endif		# if low >= high, endif
-
+        # Next we use shift less than SlT instruction o compare the low and high values
+	# a1 has the low value and a2 has the high value
+	
+	slt $t1, $a1, $t0		# set t1=1 if low < high, else set t1=0
+	beq $t1, $zero, endif		# if t1=0 low >= high, endif
+	
+	# if low is less than high jump to the partition method
 	jal partition			# call partition 
+	
+	# v0 has the pivot value returned from the partition method 
+	# move the pivot value to s0
 	move $s0, $v0			# pivot, s0= v0
 
 	lw $a1, 4($sp)			#a1 = low
