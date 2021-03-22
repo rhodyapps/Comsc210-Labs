@@ -38,6 +38,30 @@ ADDI $destination register's address, $source register's address, immediate data
 #	        quickSort(arr, pi + 1, high); // After pi
 #	    }
 #	}
+#  Pseudocode Wikipedia https://en.wikipedia.org/wiki/Quicksort
+#
+# The original partition scheme described by Tony Hoare uses two indices that start at the ends of the array being partitioned, 
+# then move toward each other, until they detect an inversion: a pair of elements, one greater than or equal to the pivot,
+#  one less than or equal, that are in the wrong order relative to each other. The inverted elements are then swapped.
+#  When the indices meet, the algorithm stops and returns the final index. Hoare's scheme is more efficient than Lomuto's 
+# partition scheme because it does three times fewer swaps on average, and it creates efficient partitions even when all values 
+# are equal
+#
+# algorithm quicksort(A, lo, hi) is
+#    if lo < hi then
+#        p := partition(A, lo, hi)
+#        quicksort(A, lo, p - 1)
+#        quicksort(A, p + 1, hi)
+
+# algorithm partition(A, lo, hi) is
+#    pivot := A[hi]
+#    i := lo
+#    for j := lo to hi do
+#        if A[j] < pivot then
+#            swap A[i] with A[j]
+#            i := i + 1
+#    swap A[i] with A[hi]
+#    return i
 #
 ###############################################################################################
 #
@@ -61,9 +85,21 @@ ADDI $destination register's address, $source register's address, immediate data
 
 array: .word 7,2,1,8,6,3,5,4 # Define a variable named array as a word (integer) array.
 
+printMsg: .asciiz "Results...."
+Spacer: .asciiz ", "
 
 # After your program has run, the integers in this array
 # should be sorted.
+
+# Results shoud be:  1, 2, 3, 4, 5, 6, 7, 8
+
+################################  Debugging #########################
+
+# Bug1: The program completes but array is not fully sorted. Results:  1, 2, 8, 3, 5, 4, 6, 7
+# - This output suggeests the partition was called once
+# important to note that lo ( a1 ) is always 0 when the program starts this ensures that partition will be called 
+# - the first pivot value is 4. The first lo value is 0 hi is 4, since 0 < 4 then partition
+# - first partition 
 
 ################################   Text Section #####################
 
@@ -79,6 +115,7 @@ main:
 	addi $a1, $zero, 0 	# Set argument 2 to (low = 0)
 	addi $a2, $zero, 7 	# Set argument 3 to (high = 7, last index in array)
 	jal quicksort 		# Call quick sort
+	jal print
 	li $v0, 10 		# Terminate program run and
 	syscall # Exit
 
@@ -95,17 +132,11 @@ quicksort:				#quicksort method
 	sw $ra, 12($sp)			# return address
 
 	move $t0, $a2			#saving high in t0
-        # Next we use shift less than SlT instruction o compare the low and high values
-	# a1 has the low value and a2 has the high value
-	
-	slt $t1, $a1, $t0		# set t1=1 if low < high, else set t1=0
-	beq $t1, $zero, endif		# if t1=0 low >= high, endif
-	
-	# if low is less than high jump to the partition method
+
+	slt $t1, $a1, $t0		# t1=1 if low < high, else 0
+	beq $t1, $zero, endif		# if low >= high, endif
+
 	jal partition			# call partition 
-	
-	# v0 has the pivot value returned from the partition method 
-	# move the pivot value to s0
 	move $s0, $v0			# pivot, s0= v0
 
 	lw $a1, 4($sp)			#a1 = low
@@ -128,9 +159,9 @@ quicksort:				#quicksort method
 
 ########################  Partition Method #########################
 
-partition: 			# The partition method is called from quicksort if low < high
+partition: 			#partition label
 
-	addi $sp, $sp, -16	# make room on stack to save array address, low, high and return address
+	addi $sp, $sp, -16	#Make room for 5
 
 	sw $a0, 0($sp)		#store a0
 	sw $a1, 4($sp)		#store a1
@@ -212,6 +243,40 @@ print:
 
       # Put code here to print out the contents of the array
       # put a space after printing each integer
+      addi $sp, $sp, -4	# Make stack room for address of array
       
+      sw $a0, 0($sp)		# Store address of array
+      
+       li      $v0,4            # print first part of the result prompt
+       la      $a0,printMsg   
+       syscall
+       
+       lw $a0, 0($sp)
+      
+      # s4 = pointer into array (at start of array)
+	move $s4, $a0
+	# move $t3, $zero
+	addi $t3, $zero, 8
+      
+      # loop for each space:
+printloop1:
+	# load the number from the array
+	lw		$a0, 0($s4)
+	# print the number
+	li		$v0, 1			# operation = 1 (print signed 32bit integer)
+	syscall					# call O/S
+	# move to the next entry
+	addiu	$s4, $s4, 4			# move to next entry
+	# print spacer
+	li 		$v0, 4			# operation = 4 (print string)
+	la 		$a0, Spacer		# param = address of string
+	syscall					# call O/S
+	
+	addi $t3, $t3, -1
+	blez $t3, return
+	# end of array hasn't been reached, so loop
+	b printloop1
+ return:     
+      addi $sp, $sp, 4 # free the stack space used to store address
       jr $ra
       
