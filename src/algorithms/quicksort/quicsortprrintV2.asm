@@ -128,9 +128,9 @@ quicksort:				#quicksort method
 
 ########################  Partition Method #########################
 
-partition: 			#partition label
+partition: 			# The partition method is called from quicksort if low < high
 
-	addi $sp, $sp, -16	#Make room for 5
+	addi $sp, $sp, -16	# make room on stack to save array address, low, high and return address
 
 	sw $a0, 0($sp)		#store a0
 	sw $a1, 4($sp)		#store a1
