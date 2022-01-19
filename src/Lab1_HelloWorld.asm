@@ -1,4 +1,4 @@
-Program 1: Hello World
+# Lab Assignment 1 : Assembly Language Program 1: Hello World
 
 # Roger Williams University COMS210
 # My First Assembly Language Program
