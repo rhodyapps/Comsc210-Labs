@@ -1,0 +1,76 @@
+# Program Name: Sum of Integers
+# Programmer: Tom Newman
+# Date last modified: 1/26/2022
+# Functional Description:
+# A program to find the Sum of the Integers from 1 to N, where N is a value
+# input from the keyboard.
+##################################################################
+# Pseudocode description of algorithm:
+# main: cout << “Please input a value for N”
+# cin >> v0
+# If ( v0 <= 0 ) stop
+# t0 = 0;
+# While (v0 > 0 ) do
+# {
+# t0 = t0 + v0;
+# v0 = v0 - 1;
+# }
+# cout << t0;
+# go to main
+
+#####################################################################
+# Cross References: 
+#  This is where we document the registers that our program will use
+#  to represent the variables in our pseudocode
+# v0: N,
+# t0: Sum
+#####################################################################
+
+############### Data Section ########################################
+.data  
+    prompt: .asciiz "\n Enter A Number: "  
+    result: .asciiz " The sum of the integers from 1 to N is: "
+    bye: .asciiz "\n **** You now have your answer - Have a good day ****"
+
+.globl main    # This is an entry point that allows other programs to call the function 'main'
+
+
+############## Code Section ########################################
+.text
+
+main:
+    li $v0, 4           # system call code for Print String
+    la $a0, prompt      # load address of prompt into $a0
+    syscall # print the prompt message
+    
+    li $v0, 5           # system call code for Read Integer
+    syscall             # reads the value of N into $v0
+    
+    blez $v0, end       # branch to end if $v0 < = 0
+    li $t0, 0           # clear register $t0 to zero
+
+loop:
+    add $t0, $t0, $v0   # sum of integers in register $t0
+    addi $v0, $v0, -1   # summing integers in reverse order
+    bnez $v0, loop      # branch to loop if $v0 is != zero
+    li $v0, 4           # system call code for Print String
+    la $a0, result      # load address of message into $a0
+    syscall             # print the string
+   
+    li $v0, 1           # system call code for Print Integer
+    move $a0, $t0       # move value to be printed to $a0
+    syscall             # print sum of integers
+   
+    b main              # branch (unconditional) to main
+
+end: 
+    li $v0, 4           # system call code for Print String
+    la $a0, bye         # load address of msg. into $a0
+    syscall             # print the string
+    
+    li $v0, 10          # terminate program run and
+    syscall             # return control to system - this is the last executable statement
+
+    # Note: you need to have a 'newline' character
+    # after the last executable statement or your 
+    # last line of code will not be compiled
