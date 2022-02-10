@@ -32,6 +32,8 @@
     result: .asciiz " The sum of the integers from 1 to N is: "
     bye: .asciiz "\n **** You now have your answer - Have a good day ****"
 
+################ Entry Point ######################################
+
 .globl main    # This is an entry point that allows other programs to call the function 'main'
 
 
