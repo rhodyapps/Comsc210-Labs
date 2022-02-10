@@ -26,7 +26,7 @@ message: .asciiz "hello world\n" # Here is the message we will display
 # we have used in our program. 
 
 # The next statement is a directive '.globl' that tells the compiler the function
-that is being identified (in theis case 'main' can be referenced from other files (global)
+# that is being identified (in theis case 'main' can be referenced from other files (global)
 
 .globl main 
 
