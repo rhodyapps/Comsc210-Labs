@@ -3,7 +3,7 @@ RWU Comsc210 Lab Assignments
 MIPS Assembly Language Program exaqmples for the class
 
 
-C Programming
+C Programming - Windows Setup steps
 Setup VS Code
 1. install VD Code
 2. Install C C++ Extension
