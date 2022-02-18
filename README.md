@@ -23,4 +23,6 @@ https://www.msys2.org/
 13. Specify a compiler path from the dropdown: C:/msys64/mingw64/bin/gcc.exe
 14. Intellisense Mode from the dropdown: ${default]
 15. Restart VS Code, enter and save helloworld.cpp program run using the coderunner 'play' button top right of your screen
-
+16. Once you have teh compiler working you want to install the 'coderunner' extension so you can get user input in the terminal
+17. After code runner is installed go into File>Preferences>Settings Type 'code runner' in the text box check the box 'run in terminal'
+18. Try a C program that asks for user input such as CircleDiameter.cpp
