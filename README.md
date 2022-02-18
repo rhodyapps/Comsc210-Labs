@@ -5,7 +5,7 @@ MIPS Assembly Language Program exaqmples for the class
 
 C Programming - Windows Setup steps
 Setup VS Code
-1. install VD Code
+1. install VS Code
 2. Install C C++ Extension
 3. Install C C++ Extension Pack
 4. Install coderunner extension
