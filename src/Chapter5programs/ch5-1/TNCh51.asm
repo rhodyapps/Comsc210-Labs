@@ -1,5 +1,5 @@
 #  COMSC210
-#   Lab 7b: Britton exercise 5.1 (page 50) - Arrays: Memory Addressing 
+#   Lab 5: Britton exercise 5.1 (page 50) - Arrays: Memory Addressing 
 
 # Programmer: T Newman
 # Date: 11/3/2016
