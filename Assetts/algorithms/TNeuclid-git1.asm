@@ -12,12 +12,12 @@
 				
 				 # This is the data section 
 
-integera:                    			# Prompt for first integer 'a'
-	.asciiz "Enter the first integer = "  	# Assembly directive used to create a null terminated ASCII string
+prompt1:                    			# Prompt for first integer 'a'
+	.asciiz "Enter the first integer: "  	# Assembly directive used to create a null terminated ASCII string
 
 
-integerb:                    			# Prompt for second integer 'b'
-	.asciiz "Enter the second integer = "  	# Assembly directive used to create a null terminated ASCII string
+prompt1:                    			# Prompt for second integer 'b'
+	.asciiz "Enter the second integer: "  	# Assembly directive used to create a null terminated ASCII string
 
 result:                    			# Display string for result GCD 'c'
 	.asciiz "the GCD is:  "  		# Assembly directive used to create a null terminated ASCII string
@@ -33,7 +33,7 @@ main:                   		# assembly label
 
 
 	li	$v0,4       		# Ready for string output
-	la	$a0,  integera		# Load address of pow
+	la	$a0,  prompt1		# Load address of pow
 	syscall         		# Print string
 	
 	li $v0,5        		# Ready for integer input
@@ -41,7 +41,7 @@ main:                   		# assembly label
 	move $t2,$v0    		# Move into to $t2 temporarily
 		
 	li	$v0,4       		# Ready for string output
-	la	$a0,integerb     		# Load address of bas
+	la	$a0, prompt2     		# Load address of bas
 	syscall         		# Print string
 	
 	li $v0,5        		# Ready for integer input
@@ -101,6 +101,12 @@ euclid:
 	lw	$s0,0($sp)  # restore $s0 to value prior to function call
 	add	$sp,$sp,4   # pop stack
 	jr	$ra         # return to calling procedure
+	
+
+
+
+
+
 	
 
 
