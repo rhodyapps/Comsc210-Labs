@@ -16,7 +16,7 @@ prompt1:                    			# Prompt for first integer 'a'
 	.asciiz "Enter the first integer: "  	# Assembly directive used to create a null terminated ASCII string
 
 
-prompt1:                    			# Prompt for second integer 'b'
+prompt2:                    			# Prompt for second integer 'b'
 	.asciiz "Enter the second integer: "  	# Assembly directive used to create a null terminated ASCII string
 
 result:                    			# Display string for result GCD 'c'
