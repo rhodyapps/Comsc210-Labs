@@ -5,10 +5,10 @@ int main()
 {
   int array[100], n, c, d, swap;
 
-  printf("Enter number of elements\n");
+  printf("\nEnter number of elements: ");
   scanf("%d", &n);
 
-  printf("Enter %d integers\n", n);
+  printf("\nEnter %d integers:\n", n);
 
   for (c = 0; c < n; c++)
     scanf("%d", &array[c]);
